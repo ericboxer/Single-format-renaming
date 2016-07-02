@@ -40,10 +40,10 @@ if args['u']:
     exit()
 
 # ===============
-# Session Variables
+# Renaming Session Variables
 # ===============
 
-dataToCSV = []
+dataToCSV = []                                                                         # Holds the values to write out to the undo.
 
 fleCount = args['s']                                                                   # Starting number to count from.
 
@@ -55,16 +55,17 @@ else:
 # ===============
 # Rename the Files
 # ===============
-for audioFile in os.listdir('./'):                                                     # Uses the directory the script is in. TODO: update to allow to chose directory.  
-    if audioFile.endswith(args['e']):
-        oldName = audioFile
-        newName = re.sub('^[0-9_ ]*', '', audioFile)                                   # Remove leading numbers, spaces, and underscores
-        newName = str(fleCount).zfill(args['p']) + locationString + newName            # Builds the final file name with padded leading number.
+for directoryFile in os.listdir('./'):                                                     # Uses the directory the script is in. TODO: update to allow to choose directory.  
+    if directoryFile.endswith(args['e']):
+        oldName = directoryFile
+        newName = str(fleCount).zfill(args['p']) + locationString +(re.sub('^[0-9_ ]*', '', directoryFile))                                   # Remove leading numbers, spaces, and underscores and then format the name.
         print("%s renamed to %s" % (oldName, newName))
         if args['c']:                                                                  # Make the changes permanant. 
             os.rename(oldName, newName)
         dataToCSV.append("%s,%s" % (newName, oldName))
         fleCount = fleCount + args['i']
+
+print(".::Renaming Completed::.")
 
 # ===============
 # Write a Rename File (rename.csv)
@@ -77,6 +78,8 @@ f = open(csvFileName, "wb")
 w = csv.writer(f, delimiter = ',')
 w.writerows([x.split(',') for x in dataToCSV])
 f.close()
+
+print(".::Undo File Created::.")
 
 
 
