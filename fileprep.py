@@ -38,10 +38,10 @@ csvFileName = "rename.csv"                                                      
 parser = argparse.ArgumentParser(description="Rename files to have a leading number with an optional text insert.")
 parser.add_argument('-f', help = "The folder with files to rename.", default = "")
 parser.add_argument('-e', help="match particular file extension. Defaults to using .wav", default = "wav")
-parser.add_argument('-s', help="What number to start from. Default is 1.", default = 1, type = int)
+parser.add_argument('-s', help="What number to start from. Default is 9001.", default = 9001, type = int)
 parser.add_argument('-i', help="The increment value. Deafault is 1.", default = 1, type = int)
 parser.add_argument('-l', help="Location this line is used. Will not include if left empty", default = '')
-parser.add_argument('-p', help = "How many 0's to pad the leading number with. Default is 3.", default = 3, type = int)
+parser.add_argument('-p', help = "How many 0's to pad the leading number with. Default is 4.", default = 4, type = int)
 parser.add_argument('-c', help = "By default outputs to the command line only. Set true commit renaming to the directory.", action = "store_true", default = False)
 parser.add_argument('-u', help = "In case of dumb.", action = "store_true", default = False)
 
@@ -96,12 +96,26 @@ else:
 for directoryFile in os.listdir(folderToUse):                                                               # Uses the directory the script is in. TODO: update to allow to choose directory.  
     if directoryFile.endswith(args['e']):
         oldName = directoryFile
-        newName = str(fleCount).zfill(args['p']) + locationString +(re.sub('^[0-9_ ]*', '', directoryFile)) # Remove leading numbers, spaces, and underscores and then format the name.
+        try:
+            oldNumber = re.search('^[0-9_ ]*',directoryFile)
+            oldNumberResult = oldNumber.group(0)
+            if len(oldNumberResult) > 0:
+                newName = oldNumberResult[:len(oldNumberResult)-1]+locationString[:-1]+ directoryFile[len(oldNumberResult)-1:]
+                
+            else:
+                newName = str(fleCount).zfill(args['p']) + locationString +(re.sub('^[0-9_ ]*', '', directoryFile))
+                # print("nope")
+                fleCount = fleCount + args['i']
+            print(newName)
+        except:
+            print("Error")
+        # newName = str(fleCount).zfill(args['p']) + locationString +(re.sub('^[0-9_ ]*', '', directoryFile)) # Remove leading numbers, spaces, and underscores and then format the name.
         print("%s is now %s" % (oldName, newName))
         if args['c']:                                                                                       # Make the changes permanant. 
             os.rename(os.path.join(folderToUse,oldName), os.path.join(folderToUse, newName))
         dataToCSV.append("%s,%s" % (newName, oldName))
-        fleCount = fleCount + args['i']
+        
+# exit()
 
 print(".::Renaming Completed::.")
 
